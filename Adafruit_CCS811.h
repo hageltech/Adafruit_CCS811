@@ -35,7 +35,7 @@
         CCS811_ERROR_ID = 0xE0,
         CCS811_SW_RESET = 0xFF,
     };
-	
+
 	//bootloader registers
 	enum
 	{
@@ -44,7 +44,7 @@
 		CCS811_BOOTLOADER_APP_VERIFY = 0xF3,
 		CCS811_BOOTLOADER_APP_START = 0xF4
 	};
-	
+
 	enum
 	{
 		CCS811_DRIVE_MODE_IDLE = 0x00,
@@ -65,64 +65,67 @@ class Adafruit_CCS811 {
 		//constructors
 		Adafruit_CCS811(void) {};
 		~Adafruit_CCS811(void) {};
-		
+
 		bool begin(uint8_t addr = CCS811_ADDRESS);
 
 		void setEnvironmentalData(uint8_t humidity, double temperature);
 
 		//calculate temperature based on the NTC register
 		double calculateTemperature();
-		
+
 		void setThresholds(uint16_t low_med, uint16_t med_high, uint8_t hysteresis = 50);
 
+    uint16_t getBaseline();
+    void setBaseline(uint16_t baseline);
+
 		void SWReset();
-		
+
 		void setDriveMode(uint8_t mode);
 		void enableInterrupt();
 		void disableInterrupt();
-		
+
 		uint16_t getTVOC() { return _TVOC; }
 		uint16_t geteCO2() { return _eCO2; }
-		
+
 		void setTempOffset(float offset) { _tempOffset = offset; }
-		
+
 		//check if data is available to be read
 		bool available();
 		uint8_t readData();
-		
+
 		bool checkError();
 
 	private:
 		uint8_t _i2caddr;
 		float _tempOffset;
-		
+
 		uint16_t _TVOC;
 		uint16_t _eCO2;
-		
+
 		void      write8(byte reg, byte value);
 		void      write16(byte reg, uint16_t value);
         uint8_t   read8(byte reg);
-		
+
 		void read(uint8_t reg, uint8_t *buf, uint8_t num);
 		void write(uint8_t reg, uint8_t *buf, uint8_t num);
 		void _i2c_init();
-		
+
 /*=========================================================================
 	REGISTER BITFIELDS
     -----------------------------------------------------------------------*/
 		// The status register
         struct status {
-           
+
             /* 0: no error
             *  1: error has occurred
-            */ 
+            */
             uint8_t ERROR: 1;
 
             // reserved : 2
 
             /* 0: no samples are ready
             *  1: samples are ready
-            */ 
+            */
             uint8_t DATA_READY: 1;
             uint8_t APP_VALID: 1;
 
@@ -150,14 +153,14 @@ class Adafruit_CCS811 {
             *  1: Interrupt mode (if enabled) only asserts the nINT signal (driven low) if the new
 				ALG_RESULT_DATA crosses one of the thresholds set in the THRESHOLDS register
 				by more than the hysteresis value (also in the THRESHOLDS register)
-            */ 
+            */
         	uint8_t INT_THRESH: 1;
 
         	/* 0: int disabled
             *  1: The nINT signal is asserted (driven low) when a new sample is ready in
 				ALG_RESULT_DATA. The nINT signal will stop being driven low when
 				ALG_RESULT_DATA is read on the I²C interface.
-            */ 
+            */
         	uint8_t INT_DATARDY: 1;
 
         	uint8_t DRIVE_MODE: 3;
@@ -167,7 +170,7 @@ class Adafruit_CCS811 {
         	}
         };
         meas_mode _meas_mode;
-		
+
         struct error_id {
         	/* The CCS811 received an I²C write request addressed to this station but with
 			invalid register address ID */
@@ -177,7 +180,7 @@ class Adafruit_CCS811 {
         	uint8_t READ_REG_INVALID: 1;
 
         	/* The CCS811 received an I²C request to write an unsupported mode to
-			MEAS_MODE */        	
+			MEAS_MODE */
         	uint8_t MEASMODE_INVALID: 1;
 
         	/* The sensor resistance measurement has reached or exceeded the maximum
